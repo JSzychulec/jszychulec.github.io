@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="rows"></div>
+    <button onclick="addRow();">Dodaj</button>
+    <br/></br>
+    <input value="15000" id="price" type="number" placeholder="Cena za m3">
+    <button onclick="calculate();">Oblicz cenę</button>
+    <p id="result"></p>
+    <input value="720" id="weight" type="number" placeholder="Cena za m3">
+    <button onclick="calculateWeight();">Oblicz wagę</button>
+    <p id="weight_result"></p>
+    <script>
+        const result = document.querySelector('#result');
+        const rows = document.getElementById('rows');
+
+        let count = 0;
+
+        function createInput(id = '', label = '', type = 'text', name) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('input_wrapper');
+            const labelEl = document.createElement('label');
+            labelEl.innerText = label;
+            labelEl.for = id;
+            const input = document.createElement('input');
+            input.type = type;
+            input.name = id;
+            input.id = id;
+            input.setAttribute('data-name', name);
+            
+            wrapper.appendChild(labelEl);
+            wrapper.appendChild(input);
+            return wrapper;
+        }
+
+        function addRow() {
+            const row = document.createElement('div');
+            row.classList.add('inputs_row');
+
+            const inputsToAdd = [
+                {name: 'a', label: 'Wymiar A', type: 'number'},
+                {name: 'b', label: 'Wymiar B', type: 'number'},
+                {name: 'c', label: 'Wymiar C', type: 'number'},
+                {name: 'count', label: 'Ilość', type: 'number'},
+            ];
+
+            const inputs = inputsToAdd.map(({name, label, type}) => createInput(`${name}_${count}`, label, type, name));
+
+            inputs.forEach((input) => {
+                row.appendChild(input);
+            })
+
+            rows.appendChild(row);
+        }
+
+        function calculate() {
+            const prices = [];
+            const pricePerM3 = parseFloat(document.querySelector('#price').value)
+            const result = document.querySelector('#result');
+
+            const inputRows = document.querySelectorAll('.inputs_row');
+            inputRows.forEach((row) => {
+                const inputA = row.querySelector('[data-name="a"]');
+                const inputB = row.querySelector('[data-name="b"]');
+                const inputC = row.querySelector('[data-name="c"]');
+                const inputCount = row.querySelector('[data-name="count"]');
+
+                const a = parseFloat(inputA.value);
+                const b = parseFloat(inputB.value);
+                const c = parseFloat(inputC.value);
+                const count = parseFloat(inputCount.value);
+
+                if (isNaN(a*b*c*count)) prices.push(0)
+                else {
+
+                    const m3 = (a*b*c*count)/1000000;
+                    const m2 = (a*b/10000)*count;
+    
+                    let price = m3 * pricePerM3;
+    
+                    console.log(price);
+                    const highest = Math.max(a, b, c);
+                    if (highest > 150) price = price*((highest-150)*0.4/100+1) 
+                    
+                    prices.push(price);
+                } 
+
+            })
+
+            if (inputRows.length === 0) return;
+            result.innerHTML = parseFloat(prices.reduce((a, b) => a+b)).toFixed(2) + ' zł';
+        }
+
+        function calculateWeight() {
+            const weights = [];
+            const result = document.querySelector('#weight_result');
+            const weightPerM3 = parseFloat(document.querySelector('#weight').value);
+
+            const inputRows = document.querySelectorAll('.inputs_row');
+            if (inputRows.length === 0) return;
+            inputRows.forEach((row) => {
+                const inputA = row.querySelector('[data-name="a"]');
+                const inputB = row.querySelector('[data-name="b"]');
+                const inputC = row.querySelector('[data-name="c"]');
+                const inputCount = row.querySelector('[data-name="count"]');
+
+                const a = parseFloat(inputA.value);
+                const b = parseFloat(inputB.value);
+                const c = parseFloat(inputC.value);
+                const count = parseFloat(inputCount.value);
+
+                if (isNaN(a*b*c*count)) weights.push(0)
+                else {
+
+                    const m3 = (a*b*c*count)/1000000;
+                    
+                    
+                    weights.push(m3*weightPerM3);
+                } 
+
+            })
+
+            result.innerHTML = parseFloat(weights.reduce((a, b) => a+b)).toFixed(2) + ' kg';
+        }
+
+
+    </script>
+
+    <style>
+        
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .input_wrapper {
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+        }
+
+        .input_wrapper input {
+            width: calc(100% - 8px);
+        }
+
+        .inputs_row {
+            display: flex;
+        }
+    </style>
+</body>
+</html>
